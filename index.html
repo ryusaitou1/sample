@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>えいごアドベンチャー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ocean:#1479A8; --lagoon:#5CC8E0; --sun:#FFC93C; --flamingo:#FF5D8F; --palm:#2FB36E; --ink:#17324D;
+  --bg:#E4F6FA; --card:#FFFFFF; --text:#17324D; --muted:#56718A; --line:#CBE5EE;
+  --sea1:#8EDCEB; --sea2:#3AA6CB; --okbg:#DDF6E8; --ngbg:#FFE3EC;
+  --ja:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",sans-serif;
+  --en:"Fredoka","Avenir Next","Segoe UI",system-ui,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C2133; --card:#15334D; --text:#EAF6FB; --muted:#A3C0D3; --line:#24496A;
+    --sea1:#1A5A7A; --sea2:#0D3A55; --okbg:#173F2D; --ngbg:#4A1E2E;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C2133; --card:#15334D; --text:#EAF6FB; --muted:#A3C0D3; --line:#24496A;
+  --sea1:#1A5A7A; --sea2:#0D3A55; --okbg:#173F2D; --ngbg:#4A1E2E;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--ja);font-weight:500;
+  -webkit-tap-highlight-color:transparent;overflow-x:hidden;line-height:1.6}
+button{font-family:inherit;color:inherit;cursor:pointer;border:0;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+.en{font-family:var(--en);font-weight:600;letter-spacing:.01em}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;align-items:center;gap:8px;
+  padding:10px 14px;background:var(--card);border-bottom:3px solid var(--line)}
+.topbar .home{font-size:1.6rem;background:none;padding:4px 8px;border-radius:12px}
+.chips{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg);border-radius:999px;padding:4px 12px;font-weight:800;font-size:1rem}
+.parentbtn{background:var(--bg);border-radius:999px;padding:6px 12px;font-size:.85rem;font-weight:700}
+
+main{max-width:880px;margin:0 auto;padding:16px 16px 40px}
+h1,h2,h3{margin:0;font-weight:800;line-height:1.3}
+.sub{color:var(--muted);margin:4px 0 0}
+
+/* map */
+.maphead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.title{font-size:clamp(1.7rem,5vw,2.4rem);color:var(--ocean)}
+:root[data-theme="dark"] .title{color:var(--lagoon)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .title{color:var(--lagoon)}}
+.mission{background:var(--card);border-radius:18px;padding:10px 14px;border:3px solid var(--sun);font-weight:700}
+.mission .dots{letter-spacing:4px;font-size:1.1rem}
+.sea{position:relative;border-radius:32px;padding:28px 18px 70px;
+  background:
+    radial-gradient(circle at 20% 15%,rgba(255,255,255,.35) 0 2px,transparent 3px) 0 0/46px 46px,
+    linear-gradient(180deg,var(--sea1),var(--sea2));
+  display:grid;grid-template-columns:repeat(2,1fr);gap:22px 18px}
+@media (min-width:640px){.sea{grid-template-columns:repeat(3,1fr)}}
+.isle{position:relative;aspect-ratio:1/0.92;border-radius:58% 42% 55% 45%/48% 55% 45% 52%;
+  background:var(--c);box-shadow:0 0 0 9px #FFE7A3, 0 12px 0 9px rgba(0,0,0,.12);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#17324D;padding:10px;
+  transition:transform .15s}
+.isle:nth-child(even){transform:translateY(34px)}
+.isle:active{transform:scale(.96)}
+.isle:nth-child(even):active{transform:translateY(34px) scale(.96)}
+.isle .ie{font-size:clamp(2.4rem,8vw,3.4rem);line-height:1}
+.isle .in{font-weight:800;font-size:1.05rem;background:rgba(255,255,255,.85);border-radius:999px;padding:0 10px}
+.isle .is{font-size:.9rem;font-weight:800}
+.isle.locked{filter:grayscale(.85) brightness(.9)}
+.isle .lock{position:absolute;inset:auto 0 10%;font-size:.8rem;font-weight:700}
+.boat{position:absolute;top:-18px;right:-6px;font-size:2rem;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(4deg)}}
+.extras{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:22px}
+.xbtn{background:var(--card);border-radius:20px;padding:14px 16px;text-align:left;display:flex;gap:12px;align-items:center;
+  border:3px solid var(--line);min-height:76px}
+.xbtn .xe{font-size:2rem}
+.xbtn b{display:block;font-size:1.05rem}
+.xbtn small{color:var(--muted)}
+.xbtn[disabled]{opacity:.5}
+
+/* island menu */
+.back{background:none;font-weight:700;color:var(--muted);padding:6px 0;margin-bottom:6px}
+.islehead{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.islehead .big{font-size:3.4rem;width:84px;height:84px;display:grid;place-items:center;border-radius:28px;background:var(--c)}
+.preview{display:flex;gap:6px;flex-wrap:wrap;font-size:1.6rem;margin:6px 0 16px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.mode{background:var(--card);border-radius:22px;padding:16px;display:flex;gap:14px;align-items:center;text-align:left;
+  border:3px solid var(--line);border-bottom-width:7px;min-height:92px}
+.mode:active{transform:translateY(3px);border-bottom-width:4px}
+.mode .me{font-size:2.3rem;width:60px;height:60px;border-radius:18px;background:var(--bg);display:grid;place-items:center;flex:none}
+.mode b{font-size:1.15rem;display:block}
+.mode small{color:var(--muted);display:block}
+.stars{color:#E9A800;font-size:1.05rem;letter-spacing:1px}
+.stars .off{color:var(--line)}
+
+/* game */
+.ghead{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.quit{width:46px;height:46px;border-radius:14px;background:var(--card);font-size:1.3rem;font-weight:800;flex:none}
+.prog{flex:1;height:16px;border-radius:999px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--palm);border-radius:999px;transition:width .3s}
+.spd{background:var(--card);border-radius:999px;padding:4px 12px;font-weight:700;font-size:.85rem;flex:none}
+.ins{text-align:center;font-weight:700;color:var(--muted);margin:4px 0 12px}
+.arow{display:flex;justify-content:center;gap:12px;margin:8px 0 16px;flex-wrap:wrap}
+.bigsound{width:112px;height:112px;border-radius:50%;background:var(--ocean);color:#fff;font-size:3rem;
+  box-shadow:0 8px 0 #0C5577}
+.bigsound:active{transform:translateY(5px);box-shadow:0 3px 0 #0C5577}
+.slow{align-self:center;background:var(--card);border-radius:999px;padding:12px 18px;font-weight:800;border:3px solid var(--line);font-size:1rem}
+.hint{text-align:center;min-height:1.6em;font-weight:800;color:var(--flamingo);font-size:1.15rem}
+.opts4{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px;margin:0 auto}
+.pic{background:var(--card);border-radius:22px;border:4px solid var(--line);padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:140px;justify-content:center}
+.pic .emo{font-size:3.4rem;line-height:1.1}
+.pic .cap{font-weight:700;color:var(--muted);font-size:.95rem}
+.yes{border-color:var(--palm)!important;background:var(--okbg)!important}
+.no{border-color:var(--flamingo)!important;background:var(--ngbg)!important;opacity:.75}
+.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.pop{animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.08)}}
+.prompt{text-align:center;margin-bottom:14px}
+.prompt .emo{font-size:5rem;line-height:1.1}
+.prompt .ja{font-size:1.3rem;font-weight:800}
+.wordopts{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px;margin:0 auto}
+.wbtn{background:var(--card);border:4px solid var(--line);border-radius:20px;min-height:84px;font-size:1.5rem;padding:8px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.wbtn small{font-family:var(--ja);font-size:.85rem;color:var(--muted);font-weight:700}
+.jabig{text-align:center;font-size:1.3rem;font-weight:800;margin:0 0 12px}
+.slots{min-height:84px;border-radius:20px;border:3px dashed var(--lagoon);padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;background:var(--card);margin-bottom:16px}
+.slots .ph{color:var(--muted);font-weight:700}
+.bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:60px}
+.tile{font-family:var(--en);font-weight:600;font-size:1.45rem;padding:10px 16px;border-radius:14px;background:var(--sun);color:#17324D;box-shadow:0 5px 0 #D9A51D;min-height:56px}
+.tile.on{background:var(--lagoon);box-shadow:0 5px 0 #2E93AD}
+.tile.glow{outline:4px solid var(--flamingo);outline-offset:3px}
+.talkq{text-align:center}
+.reveal{background:none;color:var(--ocean);font-weight:800;text-decoration:underline;font-size:1rem;padding:6px}
+.qtext{font-size:1.5rem;margin:4px 0}
+.talkopts{display:grid;gap:12px;max-width:560px;margin:0 auto}
+.topt{display:flex;align-items:stretch;background:var(--card);border:4px solid var(--line);border-radius:20px;overflow:hidden;min-height:72px}
+.topt .pick{flex:1;background:none;text-align:left;padding:10px 16px;font-size:1.4rem}
+.topt .ear{width:68px;background:var(--bg);font-size:1.5rem;flex:none}
+.trans{text-align:center;color:var(--muted);font-weight:700;margin-top:12px;min-height:1.6em}
+.speakcard{background:var(--card);border-radius:26px;padding:20px;text-align:center;border:4px solid var(--line);max-width:560px;margin:0 auto}
+.speakcard .emo{font-size:4.4rem;line-height:1.1}
+.speakcard .target{font-size:2rem;margin:6px 0 0}
+.speakcard .ja{color:var(--muted);font-weight:700}
+.mic{width:104px;height:104px;border-radius:50%;background:var(--flamingo);color:#fff;font-size:2.8rem;box-shadow:0 8px 0 #C93768}
+.mic:active{transform:translateY(5px);box-shadow:0 3px 0 #C93768}
+.mic.listening{animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 14px rgba(255,93,143,.3),0 8px 0 #C93768}}
+.selfok{background:var(--palm);color:#fff;border-radius:999px;padding:16px 26px;font-size:1.2rem;font-weight:800;box-shadow:0 6px 0 #1E8550}
+.selfok[disabled]{opacity:.45}
+.heard{min-height:3.2em;font-weight:700;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  background:var(--palm);color:#fff;font-weight:800;font-size:1.3rem;padding:12px 26px;border-radius:999px;z-index:50;pointer-events:none;
+  box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.toast.ng{background:var(--flamingo)}
+
+/* result */
+.result{text-align:center;padding:24px 0}
+.result .rs{font-size:3.6rem;letter-spacing:6px}
+.result .rs .off{opacity:.2;filter:grayscale(1)}
+.btnrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.btn{background:var(--ocean);color:#fff;border-radius:18px;padding:14px 22px;font-size:1.1rem;font-weight:800;min-height:56px;box-shadow:0 6px 0 #0C5577}
+.btn.alt{background:var(--card);color:var(--text);box-shadow:0 6px 0 var(--line);border:3px solid var(--line)}
+.btn:active{transform:translateY(4px);box-shadow:none}
+
+/* sticker book */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px}
+.st{background:var(--card);border-radius:20px;border:3px solid var(--line);aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.st .se{font-size:2.6rem}
+.st.lockd .se{filter:brightness(0) opacity(.18)}
+.st small{font-weight:800}
+
+/* dictionary */
+.dict{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.dcard{background:var(--card);border-radius:18px;border:3px solid var(--line);padding:10px;text-align:center}
+.dcard .emo{font-size:2.4rem}
+.dcard .en{font-size:1.2rem;display:block}
+.dcard small{color:var(--muted);font-weight:700}
+.slist{display:grid;gap:8px;margin-top:10px}
+.sline{background:var(--card);border-radius:16px;border:3px solid var(--line);padding:10px 14px;text-align:left}
+.sline .en{font-size:1.15rem;display:block}
+.sline small{color:var(--muted)}
+
+/* chat */
+.topics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:14px}
+.chat{display:flex;flex-direction:column;gap:12px;margin:12px 0;min-height:240px}
+.bub{max-width:86%;padding:12px 16px;border-radius:22px;background:var(--card);border:3px solid var(--line)}
+.bub.mia{align-self:flex-start;border-bottom-left-radius:6px}
+.bub.me{align-self:flex-end;background:var(--lagoon);border-color:var(--lagoon);color:#0E2A40;border-bottom-right-radius:6px}
+.bub .en{font-size:1.3rem;display:block}
+.bub .tools{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.bub .tools button{background:var(--bg);border-radius:999px;padding:6px 12px;font-weight:700;font-size:.9rem}
+.bub .jat{color:var(--muted);font-weight:700;margin-top:4px}
+.fix{align-self:flex-start;background:var(--okbg);border-radius:16px;padding:8px 14px;font-weight:700;max-width:86%}
+.fix .en{font-size:1.1rem}
+.composer{position:sticky;bottom:0;background:var(--bg);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px))}
+.hints{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.hints button{background:var(--sun);color:#17324D;border-radius:999px;padding:10px 16px;font-size:1.15rem;box-shadow:0 4px 0 #D9A51D}
+.crow{display:flex;gap:10px;align-items:center}
+.crow input{flex:1;min-width:0;font-size:1.2rem;padding:14px;border-radius:16px;border:3px solid var(--line);background:var(--card);color:var(--text);font-family:var(--en)}
+.crow .mic{width:64px;height:64px;font-size:1.8rem;box-shadow:0 5px 0 #C93768;flex:none}
+.send{background:var(--ocean);color:#fff;border-radius:16px;padding:0 18px;height:58px;font-weight:800;flex:none}
+.thinking{color:var(--muted);font-weight:700;align-self:flex-start}
+.note{background:var(--card);border-radius:16px;padding:12px 14px;border:3px solid var(--line);color:var(--muted);font-weight:700}
+
+/* parent */
+.panel{background:var(--card);border-radius:20px;padding:16px;border:3px solid var(--line);margin-top:14px}
+.panel h3{font-size:1.1rem;margin-bottom:8px}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat{background:var(--bg);border-radius:14px;padding:10px 12px}
+.stat b{font-size:1.5rem;display:block}
+.stat small{color:var(--muted)}
+.setrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:2px solid var(--line);flex-wrap:wrap}
+.setrow:first-of-type{border-top:0}
+.setrow select{font-size:1rem;padding:8px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--text);font-family:inherit}
+.toggle{width:64px;height:36px;border-radius:999px;background:var(--line);position:relative;flex:none}
+.toggle::after{content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:#fff;transition:left .15s}
+.toggle.on{background:var(--palm)}
+.toggle.on::after{left:32px}
+.weak{display:flex;flex-wrap:wrap;gap:8px}
+.weak span{background:var(--ngbg);border-radius:999px;padding:4px 12px;font-weight:700}
+.log{max-height:300px;overflow:auto;font-size:.95rem}
+.log p{margin:4px 0}
+.gate{max-width:420px;margin:40px auto;text-align:center}
+.gate input{font-size:1.6rem;width:160px;text-align:center;padding:10px;border-radius:14px;border:3px solid var(--line);background:var(--card);color:var(--text)}
+.danger{background:var(--flamingo);box-shadow:0 6px 0 #C93768}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="home" id="homeBtn" aria-label="ちずに もどる">🏝️</button>
+  <div class="chips">
+    <span class="chip" title="ほし">⭐ <span id="cStars">0</span></span>
+    <span class="chip" title="コイン">🪙 <span id="cCoins">0</span></span>
+    <span class="chip" title="れんぞく">🔥 <span id="cStreak">0</span></span>
+    <button class="parentbtn" id="parentBtn">おうちの方</button>
+  </div>
+</header>
+<main id="app"></main>
+
+<script>
+/* ============ DATA ============ */
+const W = (en,e,ja)=>({en,e,ja});
+const ISLANDS = [
+ {id:'home', name:'おうちじま', emoji:'🏠', c:'#FFB4A2',
+  words:[W('mother','👩','おかあさん'),W('father','👨','おとうさん'),W('sister','👧','おねえさん・いもうと'),W('brother','👦','おにいさん・おとうと'),
+    W('baby','👶','あかちゃん'),W('house','🏠','いえ'),W('bed','🛏️','ベッド'),W('chair','🪑','いす'),W('door','🚪','ドア'),
+    W('window','🪟','まど'),W('bath','🛁','おふろ'),W('sleep','😴','ねむる'),W('wash','🧼','あらう'),W('clean','🧹','そうじする')],
+  sentences:[['This is my mother.','これは わたしの おかあさん です。'],['I sleep in my bed.','わたしは じぶんの ベッドで ねます。'],
+    ['Please open the window.','まどを あけて ください。'],['Where is my bag?','わたしの かばんは どこ？'],
+    ['I clean my room.','わたしは じぶんの へやを そうじします。'],['Good night, Dad.','おやすみなさい、おとうさん。']],
+  talks:[
+    {q:'Who is she?',qja:'かのじょは だれ？',a:"She's my sister.",aja:'わたしの おねえさん（いもうと）だよ。',w:["It's my bed.","Yes, I do."]},
+    {q:'Is this your house?',qja:'これは あなたの いえ？',a:'Yes, it is.',aja:'うん、そうだよ。',w:['Yes, I can.',"No, I'm not."]},
+    {q:'Where is Dad?',qja:'おとうさんは どこ？',a:"He's in the kitchen.",aja:'キッチンに いるよ。',w:["It's sunny.","I'm fine."]},
+    {q:'Good night, Mom.',qja:'おやすみ、おかあさん。',a:'Good night. Sleep well.',aja:'おやすみ。よく ねてね。',w:['Good morning.','Nice to meet you.']},
+    {q:'Can you open the door?',qja:'ドアを あけて くれる？',a:'Sure.',aja:'いいよ。',w:["It's a door.",'On Monday.']},
+    {q:'How are you?',qja:'げんき？',a:"I'm fine, thank you.",aja:'げんきだよ、ありがとう。',w:["I'm ten.","It's mine."]}]},
+ {id:'food', name:'たべものじま', emoji:'🍎', c:'#FFD27A',
+  words:[W('apple','🍎','りんご'),W('banana','🍌','バナナ'),W('orange','🍊','オレンジ'),W('milk','🥛','ぎゅうにゅう'),W('juice','🧃','ジュース'),
+    W('bread','🍞','パン'),W('egg','🥚','たまご'),W('cake','🍰','ケーキ'),W('pizza','🍕','ピザ'),W('rice','🍚','ごはん'),
+    W('ice cream','🍨','アイスクリーム'),W('sandwich','🥪','サンドイッチ'),W('eat','😋','たべる'),W('drink','🥤','のむ'),W('cook','🧑‍🍳','りょうりする')],
+  sentences:[['I like apples.','わたしは りんごが すきです。'],['I eat bread for breakfast.','あさごはんに パンを たべます。'],
+    ['Do you like pizza?','ピザは すき？'],['My mother cooks dinner every day.','おかあさんは まいにち ばんごはんを つくります。'],
+    ["Let's make a cake.",'ケーキを つくろう。'],['I want orange juice.','オレンジジュースが ほしいです。']],
+  talks:[
+    {q:'What drink do you want?',qja:'なにを のみたい？',a:'Milk, please.',aja:'ぎゅうにゅうを ください。',w:['Yes, I am.','In the kitchen.']},
+    {q:'What food do you like?',qja:'どんな たべものが すき？',a:'I like pizza.',aja:'ピザが すき。',w:['Yes, it is.','At noon.']},
+    {q:'Do you like bananas?',qja:'バナナは すき？',a:'Yes, I do.',aja:'うん、すきだよ。',w:['Yes, it is.','Yes, I am.']},
+    {q:'Are you hungry?',qja:'おなか すいてる？',a:'Yes, I am.',aja:'うん、すいてる。',w:['Yes, I do.',"It's a cake."]},
+    {q:'How many eggs do you need?',qja:'たまごは いくつ いる？',a:'Three, please.',aja:'3こ ください。',w:["It's white.",'In the morning.']},
+    {q:"Let's eat lunch.",qja:'おひるごはんを たべよう。',a:"OK, let's eat.",aja:'うん、たべよう。',w:["You're welcome.","It's mine."]}]},
+ {id:'animal', name:'どうぶつじま', emoji:'🐼', c:'#A8E6A3',
+  words:[W('dog','🐶','いぬ'),W('cat','🐱','ねこ'),W('rabbit','🐰','うさぎ'),W('bird','🐦','とり'),W('fish','🐟','さかな'),
+    W('horse','🐴','うま'),W('bear','🐻','くま'),W('lion','🦁','ライオン'),W('elephant','🐘','ぞう'),W('monkey','🐵','さる'),
+    W('panda','🐼','パンダ'),W('run','🏃','はしる'),W('swim','🏊','およぐ'),W('jump','🦘','ジャンプする'),W('fly','🕊️','そらを とぶ')],
+  sentences:[['I have a dog.','わたしは いぬを かっています。'],['Cats can jump high.','ねこは たかく ジャンプできる。'],
+    ['Fish can swim.','さかなは およげる。'],['Do you have a pet?','ペットを かってる？'],
+    ['Look at that elephant.','あの ぞうを みて。'],['My rabbit is white.','わたしの うさぎは しろい。']],
+  talks:[
+    {q:'Do you have a pet?',qja:'ペットを かってる？',a:'Yes, I have a cat.',aja:'うん、ねこを かってるよ。',w:["Yes, I'm a cat.","It's Sunday."]},
+    {q:'What animal do you like?',qja:'どの どうぶつが すき？',a:'I like pandas.',aja:'パンダが すき。',w:["I'm nine.",'Yes, I do.']},
+    {q:'Can your dog swim?',qja:'あなたの いぬは およげる？',a:'Yes, it can.',aja:'うん、およげるよ。',w:['Yes, I am.',"No, it isn't."]},
+    {q:'How many cats do you have?',qja:'ねこを なんびき かってる？',a:'Two.',aja:'2ひき。',w:['Black.','In my room.']},
+    {q:'Look! A monkey!',qja:'みて！ さるだ！',a:"Wow, it's cute!",aja:'わあ、かわいい！',w:['Here you are.','See you.']},
+    {q:'Is that your rabbit?',qja:'あれは あなたの うさぎ？',a:"Yes, it's mine.",aja:'うん、わたしのだよ。',w:['Yes, I can.',"No, I don't."]}]},
+ {id:'school', name:'がっこうじま', emoji:'🎒', c:'#B5C8FF',
+  words:[W('school','🏫','がっこう'),W('book','📕','ほん'),W('pencil','✏️','えんぴつ'),W('notebook','📓','ノート'),W('bag','🎒','かばん'),
+    W('clock','🕒','とけい'),W('ruler','📏','じょうぎ'),W('scissors','✂️','はさみ'),W('dictionary','📖','じしょ'),W('music','🎵','おんがく'),
+    W('math','➗','さんすう'),W('English','🔤','えいご'),W('study','📚','べんきょうする'),W('write','✍️','かく'),W('read','👓','よむ')],
+  sentences:[['I study English.','わたしは えいごを べんきょうします。'],['This is my new bag.','これは わたしの あたらしい かばん です。'],
+    ['Please open your book.','ほんを ひらいて ください。'],['I have two pencils.','わたしは えんぴつを 2ほん もっています。'],
+    ["Let's go to school.",'がっこうへ いこう。'],['I can write my name.','わたしは じぶんの なまえを かけます。']],
+  talks:[
+    {q:'What subject do you like?',qja:'どの きょうかが すき？',a:'I like music.',aja:'おんがくが すき。',w:["I'm a student.",'On Friday.']},
+    {q:'Is this your pencil?',qja:'これは あなたの えんぴつ？',a:"No, it's Ken's.",aja:'ううん、ケンのだよ。',w:["No, I can't.",'Yes, I do.']},
+    {q:'When is the test?',qja:'テストは いつ？',a:'On Friday.',aja:'きんようびだよ。',w:['In my bag.','Thank you.']},
+    {q:'Where is the library?',qja:'としょかんは どこ？',a:"It's over there.",aja:'あそこだよ。',w:["It's a book.",'Yes, it is.']},
+    {q:'Can I use your ruler?',qja:'じょうぎを かりても いい？',a:'Sure. Here you are.',aja:'いいよ。はい、どうぞ。',w:["It's long.",'See you.']},
+    {q:'How do you go to school?',qja:'どうやって がっこうへ いくの？',a:'I walk.',aja:'あるいて いくよ。',w:['At eight.','I like school.']}]},
+ {id:'play', name:'あそびじま', emoji:'⚽', c:'#FFB3DA',
+  words:[W('play soccer','⚽','サッカーを する'),W('play tennis','🎾','テニスを する'),W('play basketball','🏀','バスケットボールを する'),
+    W('play the piano','🎹','ピアノを ひく'),W('play the guitar','🎸','ギターを ひく'),W('sing','🎤','うたう'),W('dance','💃','おどる'),
+    W('ride a bike','🚲','じてんしゃに のる'),W('watch TV','📺','テレビを みる'),W('catch a ball','🧤','ボールを とる'),
+    W('park','🏞️','こうえん'),W('game','🎮','ゲーム')],
+  sentences:[['I play soccer every day.','わたしは まいにち サッカーを します。'],['Can you play the piano?','ピアノを ひける？'],
+    ["Let's play tennis.",'テニスを しよう。'],['My sister can sing well.','わたしの おねえさんは うたが じょうずです。'],
+    ['I watch TV after dinner.','ばんごはんの あとに テレビを みます。'],['We play in the park.','わたしたちは こうえんで あそびます。']],
+  talks:[
+    {q:'Can you play the guitar?',qja:'ギターを ひける？',a:'Yes, I can.',aja:'うん、ひけるよ。',w:['Yes, I do.',"It's a guitar."]},
+    {q:'What sport do you like?',qja:'どの スポーツが すき？',a:'I like basketball.',aja:'バスケットボールが すき。',w:["I'm good.",'On Sunday.']},
+    {q:"Let's play soccer!",qja:'サッカーを しよう！',a:'Good idea!',aja:'いいね！',w:["You're welcome.",'Nice to meet you.']},
+    {q:'When do you play tennis?',qja:'いつ テニスを するの？',a:'On Sundays.',aja:'にちようびに。',w:['In the park.','With my friend.']},
+    {q:'Do you watch TV?',qja:'テレビを みる？',a:'Yes, every night.',aja:'うん、まいばん みるよ。',w:['Yes, it is.',"No, I'm not."]},
+    {q:'Where do you play?',qja:'どこで あそぶの？',a:'In the park.',aja:'こうえんで。',w:['After school.','Yes, I play.']}]},
+ {id:'weather', name:'てんきじま', emoji:'🌈', c:'#9FE3F0',
+  words:[W('sunny','☀️','はれ'),W('rainy','☔','あめ'),W('cloudy','☁️','くもり'),W('snowy','⛄','ゆき'),W('windy','🌬️','かぜが つよい'),
+    W('hot','🥵','あつい'),W('cold','🥶','さむい'),W('spring','🌸','はる'),W('summer','🌻','なつ'),W('fall','🍁','あき'),
+    W('winter','❄️','ふゆ'),W('morning','🌅','あさ'),W('night','🌙','よる')],
+  sentences:[['It is sunny today.','きょうは はれです。'],['I like summer.','わたしは なつが すきです。'],
+    ['It is cold in winter.','ふゆは さむいです。'],['What time is it?','いま なんじ？'],
+    ['I get up at seven.','わたしは 7じに おきます。'],['See you on Monday.','げつようびに またね。']],
+  talks:[
+    {q:'How is the weather?',qja:'てんきは どう？',a:"It's rainy.",aja:'あめだよ。',w:["It's Monday.","I'm ten."]},
+    {q:'What time is it?',qja:'いま なんじ？',a:"It's three o'clock.",aja:'3じだよ。',w:["It's spring.","It's my clock."]},
+    {q:'What season do you like?',qja:'どの きせつが すき？',a:'I like spring.',aja:'はるが すき。',w:["It's hot.",'At night.']},
+    {q:'Is it cold today?',qja:'きょうは さむい？',a:'Yes, it is.',aja:'うん、さむいね。',w:['Yes, I do.','Yes, I can.']},
+    {q:'What day is it today?',qja:'きょうは なんようび？',a:"It's Monday.",aja:'げつようびだよ。',w:["It's cloudy.","It's ten."]},
+    {q:'Have a nice day!',qja:'よい いちにちを！',a:'You, too!',aja:'あなたもね！',w:["I'm sorry.",'Yes, please.']}]}
+];
+const ALLWORDS = ISLANDS.flatMap(i=>i.words);
+const MODES = [
+ {id:'listen', icon:'👂', name:'おとあて', desc:'きいて、あう えを えらぶ', n:8},
+ {id:'read',   icon:'🔤', name:'よんで えらぶ', desc:'えを みて、えいごを えらぶ', n:8},
+ {id:'puzzle', icon:'🧩', name:'ことばパズル', desc:'ことばを ならべて ぶんを つくる', n:6},
+ {id:'talk',   icon:'💬', name:'かいわキャッチ', desc:'しつもんに こたえる', n:6},
+ {id:'speak',  icon:'🎤', name:'まねっこマイク', desc:'きいて まねして いってみる', n:6}
+];
+const STICKERS = ['🦄','🐉','🦖','🐳','🦋','🌈','🚀','🛸','🏰','🎡','🍩','🍭','🧁','🍉','🏆','👑','💎','🎨','🐙','🦜','🌻','🌋','🧸','🎁','🪐','🦩','🐢','🍀','🎪','🗻'];
+const stickerPrice = i => 10 + Math.floor(i/6)*5;
+const RATES = [0.9,0.75,0.6,0.5];
+const SPEEDLABEL = ['🐇 ふつう','🚶 すこし ゆっくり','🐢 ゆっくり','🐌 とても ゆっくり'];
+const UNLOCK_STARS = 4;
+
+/* ============ STATE ============ */
+const KEY='eigo-adventure-v1';
+function defaultState(){return{coins:0,stars:{},items:{},stickers:[],streak:0,lastDay:'',
+  today:{day:'',rounds:0,minutes:0,bonus:false},totalMinutes:0,totalRounds:0,
+  settings:{mic:true,ai:true,speed:1,limit:0,aiProvider:'auto',gKey:'',gModel:'gemini-2.5-flash-lite',usdJpy:150,budgetJpy:300,freeTier:false},aiLog:[],
+  usage:{calls:0,inTok:0,outTok:0,usd:0,chats:0,claudeCalls:0,days:{},last:null}}}
+function loadState(){let s=null;try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+  const d=defaultState(); if(!s||typeof s!=='object') return d;
+  return Object.assign(d,s,{settings:Object.assign(d.settings,s.settings||{}),today:Object.assign(d.today,s.today||{}),usage:Object.assign(d.usage,s.usage||{})})}
+let S=loadState();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const dstr=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const todayStr=()=>dstr(new Date());
+const yesterdayStr=()=>{const d=new Date();d.setDate(d.getDate()-1);return dstr(d)};
+function rollDay(){const t=todayStr();
+  if(S.today.day!==t){S.today={day:t,rounds:0,minutes:0,bonus:false}}
+  if(S.lastDay&&S.lastDay!==t&&S.lastDay!==yesterdayStr()){S.streak=0}
+  save()}
+rollDay();
+
+/* ============ HELPERS ============ */
+const app=document.getElementById('app');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+const boxOf=k=>(S.items[k]&&S.items[k].box)||0;
+function pickWeighted(arr,n,keyFn){return arr.map(x=>({x,s:Math.random()+boxOf(keyFn(x))*0.35})).sort((a,b)=>a.s-b.s).slice(0,Math.min(n,arr.length)).map(o=>o.x)}
+function markItem(k,ok,clean){const it=S.items[k]||{box:0,c:0,w:0};
+  if(ok){it.c++; if(clean) it.box=Math.min(5,it.box+1)} else {it.w++; it.box=0}
+  S.items[k]=it}
+const islandStars=id=>MODES.reduce((s,m)=>s+(S.stars[id+':'+m.id]||0),0);
+const totalStars=()=>Object.values(S.stars).reduce((a,b)=>a+b,0);
+const unlocked=i=>i===0||islandStars(ISLANDS[i-1].id)>=UNLOCK_STARS;
+const starStr=(n,max=3)=>'<span class="stars">'+'★'.repeat(n)+'<span class="off">'+'★'.repeat(max-n)+'</span></span>';
+function updateBar(){document.getElementById('cStars').textContent=totalStars();
+  document.getElementById('cCoins').textContent=S.coins;document.getElementById('cStreak').textContent=S.streak}
+let toastT;
+function toast(msg,ng){document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div');t.className='toast'+(ng?' ng':'');t.textContent=msg;document.body.appendChild(t);
+  clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),1100)}
+const PRAISE=['せいかい！','すごい！','いいね！','ばっちり！','やったね！'];
+const praise=()=>PRAISE[Math.random()*PRAISE.length|0];
+function limitReached(){return S.settings.limit>0&&S.today.minutes>=S.settings.limit}
+
+/* ============ SPEECH OUT ============ */
+const hasTTS='speechSynthesis' in window;
+let voice=null;
+function pickVoice(){if(!hasTTS)return;const vs=speechSynthesis.getVoices();const en=vs.filter(v=>/^en[-_]/i.test(v.lang));
+  voice=en.find(v=>/Samantha|Google US English|Aaron|Nicky|Ava/i.test(v.name))||en.find(v=>/en[-_]US/i.test(v.lang))||en[0]||null}
+if(hasTTS){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+let speedLevel=0, okRun=0;
+const curRate=()=>RATES[speedLevel]*S.settings.speed;
+function say(text,rate){if(!hasTTS)return;
+  const u=new SpeechSynthesisUtterance(text);u.lang='en-US';if(voice)u.voice=voice;u.rate=rate||curRate();
+  if(speechSynthesis.speaking||speechSynthesis.pending){speechSynthesis.cancel();setTimeout(()=>speechSynthesis.speak(u),80)}
+  else speechSynthesis.speak(u)}
+const saySlow=t=>say(t,0.5*S.settings.speed);
+function slower(){speedLevel=Math.min(3,speedLevel+1);okRun=0;updSpd()}
+function gotRight(clean){if(!clean){okRun=0;return}okRun++;if(okRun>=2&&speedLevel>0){speedLevel--;okRun=0;updSpd()}}
+function updSpd(){const el=document.getElementById('spd');if(el)el.textContent=SPEEDLABEL[speedLevel]}
+
+/* ============ SPEECH IN ============ */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let micBroken=false;
+const micAvailable=()=>!!SR&&S.settings.mic&&!micBroken;
+// onStatus('ready') = マイクが音を拾い始めた / ('interim', text) = 途中経過
+function listen(onStatus){return new Promise((resolve,reject)=>{
+  if(hasTTS)speechSynthesis.cancel();
+  let r;try{r=new SR()}catch(e){micBroken=true;reject('init');return}
+  r.lang='en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=3;
+  let done=false,lastInterim='';
+  const finish=v=>{if(done)return;done=true;clearTimeout(tm);resolve(v)};
+  r.onaudiostart=()=>{onStatus&&onStatus('ready')};
+  r.onresult=e=>{let fin=null,interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){const res=e.results[i];if(res.isFinal)fin=res;else interim+=res[0].transcript}
+    if(interim){lastInterim=interim;onStatus&&onStatus('interim',interim)}
+    if(fin){finish([...fin].map(a=>a.transcript));try{r.stop()}catch(x){}}};
+  r.onerror=e=>{if(done)return;
+    if(['not-allowed','service-not-allowed','audio-capture'].includes(e.error)){micBroken=true;done=true;clearTimeout(tm);reject(e.error);return}
+    if(e.error==='no-speech'||e.error==='aborted'){finish(lastInterim?[lastInterim]:[]);return}
+    done=true;clearTimeout(tm);reject(e.error)};
+  r.onend=()=>finish(lastInterim?[lastInterim]:[]);
+  try{r.start()}catch(e){done=true;micBroken=true;reject('start');return}
+  const tm=setTimeout(()=>{try{r.stop()}catch(e){}},9000)})}
+
+const NUM={'0':'zero','1':'one','2':'two','3':'three','4':'four','5':'five','6':'six','7':'seven','8':'eight','9':'nine','10':'ten','11':'eleven','12':'twelve'};
+function norm(s){return s.toLowerCase().replace(/[’]/g,"'").replace(/[^a-z0-9' ]/g,' ').split(/\s+/).filter(Boolean).map(w=>NUM[w]||w).join(' ')}
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+// 判定で重視しない短い機能語（内容語は1語ずつ必ずチェックする）
+const STOPW=new Set(['a','an','the','is','am','are','i','my','to','in','on','at','it','do','you','of','and','this','that','please','i\'m','it\'s']);
+const stemW=w=>w.length>3?w.replace(/'s$/,'').replace(/s$/,''):w;
+function wsim(a,b){a=stemW(a);b=stemW(b);if(a===b)return 1;return 1-lev(a,b)/Math.max(a.length,b.length)}
+// 1語ずつ照合し、内容語がすべて聞き取れたときだけ合格。上位2候補のみ使う。
+function judge(target,alts){const tw=norm(target).split(' ');
+  let best={ok:false,score:-1,missing:tw.filter(w=>!STOPW.has(w)),heard:alts[0]||''};
+  for(const a of alts.slice(0,2)){const hw=norm(a).split(' ').filter(Boolean);if(!hw.length)continue;
+    const sims=tw.map(t=>Math.max(...hw.map(h=>wsim(t,h))));
+    const items=tw.map((t,i)=>({t,s:sims[i],c:!STOPW.has(t)}));
+    const keys=items.some(x=>x.c)?items.filter(x=>x.c):items;
+    const thr=tw.length===1?0.8:0.75;
+    const missing=keys.filter(x=>x.s<thr).map(x=>x.t);
+    const extra=Math.max(0,hw.length-tw.length-1);
+    const score=sims.reduce((x,y)=>x+y,0)/tw.length-extra*0.1;
+    const ok=!missing.length&&score>=0.7;
+    if(ok)return{ok,score,missing,heard:a};
+    if(score>best.score)best={ok,score,missing,heard:a}}
+  return best}
+/* ============ TIME TRACKING ============ */
+let active=false;
+setInterval(()=>{if(active&&document.visibilityState==='visible'){rollDay();S.today.minutes+=0.5;S.totalMinutes+=0.5;save()}},30000);
+
+/* ============ SCREENS: MAP ============ */
+function showMap(){active=false;if(hasTTS)speechSynthesis.cancel();updateBar();
+  const cur=ISLANDS.reduce((acc,_,i)=>unlocked(i)?i:acc,0);
+  const weakPool=weakWords();
+  const r=Math.min(3,S.today.rounds);
+  app.innerHTML=`
+  <div class="maphead">
+    <div><h1 class="title">えいごアドベンチャー</h1><p class="sub">しまを えらんで ぼうけんしよう</p></div>
+    <div class="mission">きょうの ミッション：3かい あそぼう <span class="dots">${'🟢'.repeat(r)}${'⚪'.repeat(3-r)}</span>${S.today.bonus?' ✅':''}</div>
+  </div>
+  <div class="sea">${ISLANDS.map((is,i)=>{const u=unlocked(i);return`
+    <button class="isle${u?'':' locked'}" style="--c:${is.c}" data-i="${i}" aria-label="${is.name}">
+      ${i===cur?'<span class="boat" aria-hidden="true">⛵</span>':''}
+      <span class="ie">${is.emoji}</span><span class="in">${is.name}</span>
+      <span class="is">⭐ ${islandStars(is.id)} / 15</span>
+      ${u?'':`<span class="lock">🔒 まえの しまで ⭐${UNLOCK_STARS}こ</span>`}
+    </button>`}).join('')}</div>
+  <div class="extras">
+    <button class="xbtn" id="weakBtn" ${weakPool.length<4?'disabled':''}><span class="xe">🔁</span><span><b>にがて チャレンジ</b><small>${weakPool.length<4?'まちがえた ことばが 4つ たまると あそべるよ':'まちがえた ことば '+weakPool.length+'こ'}</small></span></button>
+    <button class="xbtn" id="stickerBtn"><span class="xe">📒</span><span><b>シールちょう</b><small>コインで シールを あつめよう</small></span></button>
+    ${S.settings.ai?`<button class="xbtn" id="aiBtn"><span class="xe">👧🏼</span><span><b>ミアと はなそう</b><small>AIの ともだちと えいごで おしゃべり</small></span></button>`:''}
+  </div>`;
+  app.querySelectorAll('.isle').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;
+    if(!unlocked(i)){toast('まだ いけないよ 🔒',true);b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');return}
+    showIsland(i)});
+  document.getElementById('weakBtn').onclick=()=>startRound(null,'listen');
+  document.getElementById('stickerBtn').onclick=showStickers;
+  const ab=document.getElementById('aiBtn');if(ab)ab.onclick=showAIMenu;
+  window.scrollTo(0,0)}
+function weakWords(){return ALLWORDS.filter(w=>{const it=S.items['w:'+w.en];return it&&it.w>0&&it.box<3})}
+
+/* ============ ISLAND ============ */
+function showIsland(i){active=false;const is=ISLANDS[i];
+  app.innerHTML=`
+  <button class="back" id="bk">← ちずに もどる</button>
+  <div class="islehead"><div class="big" style="--c:${is.c}">${is.emoji}</div>
+    <div><h2>${is.name}</h2><p class="sub">⭐ ${islandStars(is.id)} / 15</p></div></div>
+  <div class="preview" aria-hidden="true">${is.words.map(w=>w.e).join(' ')}</div>
+  <div class="modes">${MODES.map(m=>`
+    <button class="mode" data-m="${m.id}"><span class="me">${m.icon}</span>
+      <span><b>${m.name}</b><small>${m.desc}</small>${starStr(S.stars[is.id+':'+m.id]||0)}</span></button>`).join('')}
+    <button class="mode" id="dictBtn"><span class="me">📗</span><span><b>ことば ずかん</b><small>タップして おとを きこう</small></span></button>
+  </div>`;
+  document.getElementById('bk').onclick=showMap;
+  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>startRound(i,b.dataset.m));
+  document.getElementById('dictBtn').onclick=()=>showDict(i);
+  window.scrollTo(0,0)}
+
+function showDict(i){const is=ISLANDS[i];
+  app.innerHTML=`<button class="back" id="bk">← ${is.name}に もどる</button>
+  <h2>📗 ことば ずかん</h2><p class="sub">カードを タップすると よみあげるよ。🐢で ゆっくり。</p>
+  <div class="arow" style="justify-content:flex-start"><button class="slow" id="slowTg">🐢 ゆっくり：オフ</button></div>
+  <div class="dict">${is.words.map((w,k)=>`<button class="dcard" data-k="${k}"><div class="emo">${w.e}</div><span class="en">${esc(w.en)}</span><small>${esc(w.ja)}</small></button>`).join('')}</div>
+  <h3 style="margin-top:20px">ぶん</h3>
+  <div class="slist">${is.sentences.map((s,k)=>`<button class="sline" data-s="${k}"><span class="en">${esc(s[0])}</span><small>${esc(s[1])}</small></button>`).join('')}</div>`;
+  let slow=false;
+  const tg=document.getElementById('slowTg');tg.onclick=()=>{slow=!slow;tg.textContent='🐢 ゆっくり：'+(slow?'オン':'オフ')};
+  const sp=t=>slow?saySlow(t):say(t,0.9*S.settings.speed);
+  document.getElementById('bk').onclick=()=>showIsland(i);
+  app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{sp(is.words[+b.dataset.k].en);b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')});
+  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>sp(is.sentences[+b.dataset.s][0]));
+  window.scrollTo(0,0)}
+
+/* ============ ROUND ENGINE ============ */
+let G=null;
+function startRound(i,mode){
+  if(limitReached()){showRest();return}
+  const m=MODES.find(x=>x.id===mode);const is=i===null?null:ISLANDS[i];
+  let qs;
+  if(mode==='listen'||mode==='read'){
+    const pool=is?is.words:weakWords();const distract=is?is.words:ALLWORDS;
+    qs=pickWeighted(pool,m.n,w=>'w:'+w.en).map(t=>({t,key:'w:'+t.en,
+      opts:shuffle([t,...shuffle(distract.filter(x=>x.en!==t.en&&x.e!==t.e)).slice(0,3)])}));
+  } else if(mode==='puzzle'){
+    qs=shuffle(is.sentences).map(s=>({en:s[0],ja:s[1],key:'s:'+s[0]}));
+  } else if(mode==='talk'){
+    qs=pickWeighted(is.talks,m.n,t=>'t:'+t.q).map(t=>({...t,key:'t:'+t.q,opts:shuffle([t.a,...t.w])}));
+  } else if(mode==='speak'){
+    const ws=pickWeighted(is.words,4,w=>'w:'+w.en).map(w=>({en:w.en,e:w.e,ja:w.ja,key:'p:'+w.en}));
+    const ss=shuffle(is.sentences).slice(0,2).map(s=>({en:s[0],e:'💬',ja:s[1],key:'p:'+s[0]}));
+    qs=[...ws,...ss];
+  }
+  speedLevel=Math.max(0,speedLevel-1);okRun=0;
+  G={i,mode,qs,idx:0,mistakes:0,coins:0,wrongNow:0};
+  active=true;renderQ()}
+
+function frame(inner){app.innerHTML=`
+  <div class="ghead"><button class="quit" id="quit" aria-label="やめる">✕</button>
+    <div class="prog" aria-hidden="true"><i style="width:${G.idx/G.qs.length*100}%"></i></div>
+    <span class="spd" id="spd">${SPEEDLABEL[speedLevel]}</span></div>
+  <div id="gbody">${inner}</div>`;
+  document.getElementById('quit').onclick=()=>{G.i===null?showMap():showIsland(G.i)}}
+
+function renderQ(){G.wrongNow=0;const q=G.qs[G.idx];
+  ({listen:rListen,read:rRead,puzzle:rPuzzle,talk:rTalk,speak:rSpeak})[G.mode](q);window.scrollTo(0,0)}
+function onRight(q,delay=1300){const clean=G.wrongNow===0;markItem(q.key,true,clean);
+  if(clean){S.coins++;G.coins++}gotRight(clean);save();updateBar();toast(praise());
+  setTimeout(nextQ,delay)}
+function onWrong(q){G.mistakes++;G.wrongNow++;markItem(q.key,false);save();slower();toast('おしい！',true)}
+function nextQ(){if(!G)return;G.idx++;if(G.idx>=G.qs.length)finishRound();else renderQ()}
+
+/* listen */
+function rListen(q){
+  frame(`<p class="ins">えいごを きいて、あう えを タップしてね</p>
+  <div class="arow"><button class="bigsound" id="play" aria-label="もういちど きく">🔊</button><button class="slow" id="slow">🐢 ゆっくり</button></div>
+  <div class="hint" id="hint"></div>
+  <div class="opts4">${q.opts.map((o,k)=>`<button class="pic" data-k="${k}"><span class="emo">${o.e}</span><span class="cap">${esc(o.ja)}</span></button>`).join('')}</div>`);
+  const play=()=>say(q.t.en);
+  document.getElementById('play').onclick=play;
+  document.getElementById('slow').onclick=()=>saySlow(q.t.en);
+  let done=false;
+  app.querySelectorAll('.pic').forEach(b=>b.onclick=()=>{if(done)return;const o=q.opts[+b.dataset.k];
+    if(o.en===q.t.en){done=true;b.classList.add('yes','pop');b.querySelector('.cap').innerHTML=`<span class="en" style="font-size:1.3rem;color:var(--text)">${esc(o.en)}</span>`;
+      say(o.en,0.85*S.settings.speed);onRight(q)}
+    else{b.classList.add('no','shake');b.disabled=true;onWrong(q);setTimeout(play,500);
+      if(G.wrongNow>=2)document.getElementById('hint').textContent='ヒント： '+q.t.en[0]+' '+'＿ '.repeat(Math.max(0,q.t.en.replace(/ /g,'').length-1)).trim()}});
+  setTimeout(play,350)}
+
+/* read */
+function rRead(q){
+  frame(`<p class="ins">えに あう えいごを えらんでね</p>
+  <div class="prompt"><div class="emo">${q.t.e}</div><div class="ja">${esc(q.t.ja)}</div></div>
+  <div class="hint" id="hint"></div>
+  <div class="wordopts">${q.opts.map((o,k)=>`<button class="wbtn en" data-k="${k}">${esc(o.en)}<small></small></button>`).join('')}</div>`);
+  let done=false;
+  app.querySelectorAll('.wbtn').forEach(b=>b.onclick=()=>{if(done)return;const o=q.opts[+b.dataset.k];
+    if(o.en===q.t.en){done=true;b.classList.add('yes','pop');say(o.en);onRight(q)}
+    else{b.classList.add('no','shake');b.disabled=true;b.querySelector('small').textContent=o.e+' '+o.ja;say(o.en);onWrong(q);
+      if(G.wrongNow>=2){document.getElementById('hint').textContent='ヒント：おとを きいてみよう 🔊';setTimeout(()=>say(q.t.en),900)}}})}
+
+/* puzzle */
+function rPuzzle(q){
+  const toks=q.en.split(' ');
+  let bank=toks.map((t,i)=>({t,i}));
+  if(toks.length>1){do{bank=shuffle(bank)}while(bank.map(x=>x.t).join(' ')===q.en)}
+  let ans=[];let done=false;
+  frame(`<p class="ins">にほんごに あうように ことばを ならべてね</p><p class="jabig">${esc(q.ja)}</p><div id="pz"></div>
+    <div class="arow"><button class="slow" id="hear">🔊 ぶんを きく</button><button class="slow" id="slow">🐢 ゆっくり</button></div>
+    <div class="hint" id="hint"></div>`);
+  document.getElementById('hear').onclick=()=>say(q.en);
+  document.getElementById('slow').onclick=()=>saySlow(q.en);
+  function draw(){const nextTok=toks[ans.length];let glowed=false;
+    document.getElementById('pz').innerHTML=`
+    <div class="slots">${ans.length?ans.map((x,k)=>`<button class="tile on" data-a="${k}">${esc(x.t)}</button>`).join(''):'<span class="ph">ここに ならべよう</span>'}</div>
+    <div class="bank">${bank.map((x,k)=>{let g='';if(G.wrongNow>=2&&!glowed&&x.t===nextTok){g=' glow';glowed=true}
+      return`<button class="tile${g}" data-b="${k}">${esc(x.t)}</button>`}).join('')}</div>`;
+    app.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{if(done)return;ans.push(bank.splice(+b.dataset.b,1)[0]);check()});
+    app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{if(done)return;bank.push(...ans.splice(+b.dataset.a,1));draw()})}
+  function check(){if(bank.length){draw();return}
+    const built=ans.map(x=>x.t).join(' ');
+    if(built===q.en){done=true;draw();document.querySelector('.slots').classList.add('yes','pop');say(q.en);onRight(q,2200)}
+    else{let k=ans.findIndex((x,j)=>x.t!==toks[j]);bank=bank.concat(ans.splice(k));onWrong(q);draw();
+      document.querySelector('.slots').classList.add('shake');
+      document.getElementById('hint').textContent=(k+1)+'ばんめから ちがうよ'+(G.wrongNow>=2?'。ひかっている ことばが つぎだよ':'')}}
+  draw()}
+
+/* talk */
+function rTalk(q){
+  frame(`<p class="ins">しつもんを きいて、いい こたえを えらんでね</p>
+  <div class="arow"><button class="bigsound" id="play" aria-label="しつもんを きく">🔊</button><button class="slow" id="slow">🐢 ゆっくり</button></div>
+  <div class="talkq"><button class="reveal" id="rev">もじを みる</button><div id="qt"></div></div>
+  <div class="talkopts">${q.opts.map((o,k)=>`<div class="topt" data-k="${k}"><button class="pick en">${esc(o)}</button><button class="ear" aria-label="きく">🔊</button></div>`).join('')}</div>
+  <div class="trans" id="tr"></div>`);
+  const play=()=>say(q.q);
+  document.getElementById('play').onclick=play;
+  document.getElementById('slow').onclick=()=>saySlow(q.q);
+  const showQ=()=>{document.getElementById('qt').innerHTML=`<p class="qtext en">${esc(q.q)}</p><p class="sub">${esc(q.qja)}</p>`;document.getElementById('rev').hidden=true};
+  document.getElementById('rev').onclick=showQ;
+  let done=false;
+  app.querySelectorAll('.topt').forEach(row=>{const o=q.opts[+row.dataset.k];
+    row.querySelector('.ear').onclick=()=>say(o);
+    row.querySelector('.pick').onclick=()=>{if(done)return;
+      if(o===q.a){done=true;row.classList.add('yes','pop');showQ();document.getElementById('tr').textContent='こたえ：'+q.aja;say(o);onRight(q,2400)}
+      else{row.classList.add('no','shake');row.querySelector('.pick').disabled=true;onWrong(q);setTimeout(play,500);
+        if(G.wrongNow>=2)showQ()}}});
+  setTimeout(play,350)}
+
+/* speak */
+function rSpeak(q){
+  let tries=0,done=false;
+  const useMic=micAvailable();
+  frame(`<p class="ins">${useMic?'きいてから 🎤を おして、マイクが あかく なったら いってね':'きいてから、こえに だして いってみよう'}</p>
+  <div class="speakcard"><div class="emo">${q.e}</div><p class="target en">${esc(q.en)}</p><p class="ja">${esc(q.ja)}</p>
+    <div class="arow"><button class="slow" id="hear">🔊 きく</button><button class="slow" id="slow">🐢 ゆっくり</button></div>
+    <div class="arow">${useMic?'<button class="mic" id="mic" aria-label="はなす">🎤</button>':'<button class="selfok" id="self" disabled>🙌 いえた！</button>'}</div>
+    <div class="heard" id="heard">${useMic?'':'<span class="sub">（マイクを つかわない モード）</span>'}</div>
+    <div class="arow" id="skiprow" hidden><button class="btn alt" id="skip">つぎへ すすむ</button></div></div>`);
+  const H=()=>document.getElementById('heard');
+  const hear=()=>{say(q.en);const s=document.getElementById('self');if(s)s.disabled=false};
+  document.getElementById('hear').onclick=hear;
+  document.getElementById('slow').onclick=()=>{saySlow(q.en);const s=document.getElementById('self');if(s)s.disabled=false};
+  const pass=msg=>{if(done)return;done=true;if(tries>0)G.mistakes++;markItem(q.key,true,tries===0);
+    if(tries===0){S.coins++;G.coins++}gotRight(tries===0);save();updateBar();H().innerHTML=msg;toast(praise());setTimeout(nextQ,1700)};
+  document.getElementById('skip').onclick=()=>{if(done)return;done=true;G.mistakes++;markItem(q.key,false);save();nextQ()};
+  const self=document.getElementById('self');
+  if(self)self.onclick=()=>pass('🎉 よく いえたね！');
+  const mic=document.getElementById('mic');
+  if(mic)mic.onclick=()=>{if(done||mic.classList.contains('busy'))return;
+    mic.classList.add('busy');mic.style.opacity='.6';H().textContent='じゅんび ちゅう…';
+    listen((st,txt)=>{if(st==='ready'){mic.style.opacity='1';mic.classList.add('listening');H().innerHTML='<b style="color:var(--flamingo)">🔴 いま はなしてね！</b>'}
+      else if(st==='interim')H().innerHTML='きこえてる：<span class="en">'+esc(txt)+'</span>'})
+    .then(alts=>{mic.classList.remove('listening','busy');mic.style.opacity='1';
+      if(!alts.length){H().innerHTML='きこえなかったよ。🎤に ちかづいて、すこし おおきな こえで いってみてね';return}
+      const j=judge(q.en,alts);
+      if(j.ok){pass(`🎉 ばっちり！ <span class="en">"${esc(j.heard)}"</span>`);return}
+      tries++;slower();
+      const miss=j.missing.length?`<br>「<span class="en">${j.missing.map(esc).join(' ')}</span>」が うまく きこえなかったよ`:'';
+      H().innerHTML=`きこえた ことば：<span class="en">"${esc(j.heard)}"</span>${miss}<br>${tries>=3?'むずかしいね。もう いちど ためすか、つぎへ すすもう':'おしい！ もういちど きいて まねしてみよう'}`;
+      if(tries>=3)document.getElementById('skiprow').hidden=false;
+      setTimeout(()=>say(q.en),700)})
+    .catch(()=>{mic.classList.remove('listening','busy');mic.style.opacity='1';
+      if(micBroken){toast('マイクが つかえないみたい',true);setTimeout(()=>rSpeak(q),900)}
+      else H().textContent='うまく きけなかったよ。もういちど おしてね'})};
+  setTimeout(hear,350)}
+
+/* finish */
+function finishRound(){active=false;
+  const m=G.mistakes;const stars=m<=1?3:m<=3?2:1;let bonus=5;
+  rollDay();const t=todayStr();
+  if(S.lastDay!==t){S.streak=(S.lastDay===yesterdayStr()?S.streak:0)+1;S.lastDay=t}
+  S.today.rounds++;S.totalRounds++;
+  let mission='';
+  if(S.today.rounds>=3&&!S.today.bonus){S.today.bonus=true;bonus+=10;mission='<p><b>🎯 きょうの ミッション クリア！ ボーナス 🪙10</b></p>'}
+  S.coins+=bonus;G.coins+=bonus;
+  const hasNext=G.i!==null&&G.i+1<ISLANDS.length;
+  const before=hasNext&&unlocked(G.i+1);
+  if(G.i!==null){const k=ISLANDS[G.i].id+':'+G.mode;if(stars>(S.stars[k]||0))S.stars[k]=stars}
+  save();updateBar();
+  const newly=hasNext&&!before&&unlocked(G.i+1);
+  app.innerHTML=`<div class="result">
+    <h2>${stars===3?'パーフェクト！':stars===2?'よく できました！':'クリア！'}</h2>
+    <div class="rs">${'⭐'.repeat(stars)}<span class="off">${'⭐'.repeat(3-stars)}</span></div>
+    <p>🪙 ${G.coins} コイン ゲット！</p>${mission}
+    ${newly?`<p><b>${ISLANDS[G.i+1].emoji} ${ISLANDS[G.i+1].name}に いけるように なったよ！</b></p>`:''}
+    <div class="btnrow"><button class="btn alt" id="again">もういちど</button><button class="btn" id="back">${G.i===null?'ちずに もどる':'しまに もどる'}</button></div></div>`;
+  const gi=G.i,gm=G.mode;
+  document.getElementById('again').onclick=()=>startRound(gi,gm);
+  document.getElementById('back').onclick=()=>gi===null?showMap():showIsland(gi);
+  if(stars===3)say('Great job!',0.9)}
+
+/* ============ STICKERS ============ */
+function showStickers(){active=false;
+  app.innerHTML=`<button class="back" id="bk">← ちずに もどる</button>
+  <h2>📒 シールちょう</h2><p class="sub">🪙 ${S.coins} コイン もっているよ。シールを タップして かおう。</p>
+  <div class="sgrid" style="margin-top:14px">${STICKERS.map((s,i)=>{const own=S.stickers.includes(s);
+    return`<button class="st${own?'':' lockd'}" data-i="${i}"><span class="se">${s}</span><small>${own?'ゲット！':'🪙'+stickerPrice(i)}</small></button>`}).join('')}</div>`;
+  document.getElementById('bk').onclick=showMap;
+  app.querySelectorAll('.st').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,s=STICKERS[i];
+    if(S.stickers.includes(s)){b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');return}
+    const p=stickerPrice(i);if(S.coins<p){toast('コインが たりないよ',true);return}
+    S.coins-=p;S.stickers.push(s);save();updateBar();toast('シール ゲット！');showStickers()})}
+
+/* ============ REST ============ */
+function showRest(){active=false;
+  app.innerHTML=`<div class="result"><div style="font-size:4rem">🌙</div><h2>きょうは ここまで！</h2>
+  <p>たくさん がんばったね。また あした あそぼう。</p>
+  <div class="btnrow"><button class="btn" id="m">ちずを みる</button></div></div>`;
+  document.getElementById('m').onclick=showMap}
+
+/* ============ AI FRIEND ============ */
+const TOPICS=[
+ {id:'me',e:'🙋',ja:'じこしょうかい',en:'introducing ourselves (name, age, likes)'},
+ {id:'food',e:'🍕',ja:'すきな たべもの',en:'favorite food and drinks'},
+ {id:'animal',e:'🐶',ja:'どうぶつ・ペット',en:'animals and pets'},
+ {id:'school',e:'🏫',ja:'がっこう',en:'school, subjects and friends'},
+ {id:'play',e:'⚽',ja:'あそび・スポーツ',en:'sports, games and hobbies'},
+ {id:'weather',e:'🌈',ja:'てんき・きせつ',en:'weather and seasons'}];
+const AI_MAX=6;
+let samplePromise=null;
+function getSample(){if(!samplePromise){samplePromise=(window.claude&&typeof window.claude.use==='function')?window.claude.use('sample').catch(()=>null):Promise.resolve(null)}return samplePromise}
+
+/* ---- Gemini ---- */
+// USD per 1M tokens (paid tier, Standard). Gemini API pricing page, checked 2026-10-12. 出力は思考トークン込み。
+const GEMINI_MODELS={
+ 'gemini-2.5-flash-lite':{label:'Gemini 2.5 Flash-Lite（いちばん安い・おすすめ）',in:0.10,out:0.40,think0:true},
+ 'gemini-3.1-flash-lite':{label:'Gemini 3.1 Flash-Lite',in:0.25,out:1.50},
+ 'gemini-2.5-flash':{label:'Gemini 2.5 Flash',in:0.30,out:2.50,think0:true},
+ 'gemini-3.5-flash-lite':{label:'Gemini 3.5 Flash-Lite',in:0.30,out:2.50}};
+const gm=()=>GEMINI_MODELS[S.settings.gModel]||GEMINI_MODELS['gemini-2.5-flash-lite'];
+const monthStr=()=>todayStr().slice(0,7);
+const yen=usd=>usd*(+S.settings.usdJpy||150);
+function fmtYen(usd){const y=yen(usd);return y<0.01&&y>0?'0.01円未満':y<10?y.toFixed(2)+'円':Math.round(y).toLocaleString()+'円'}
+function monthUsd(){const m=monthStr();return Object.entries(S.usage.days).filter(([d])=>d.startsWith(m)).reduce((a,[,v])=>a+v.usd,0)}
+function budgetHit(){const b=+S.settings.budgetJpy||0;return b>0&&yen(monthUsd())>=b}
+function recordUsage(u){const U=S.usage,d=todayStr();const day=U.days[d]||(U.days[d]={calls:0,in:0,out:0,usd:0});
+  U.calls++;U.inTok+=u.in;U.outTok+=u.out;U.usd+=u.usd;day.calls++;day.in+=u.in;day.out+=u.out;day.usd+=u.usd;
+  U.last=u;const keys=Object.keys(U.days).sort();while(keys.length>120)delete U.days[keys.shift()];save()}
+
+async function callGemini(system,turns,maxTok){const key=S.settings.gKey.trim();if(!key)throw{code:'no_key'};
+  const model=S.settings.gModel,info=gm();const t0=performance.now();
+  const gen={responseMimeType:'application/json',temperature:0.8,maxOutputTokens:maxTok||400};
+  if(info.think0)gen.thinkingConfig={thinkingBudget:0};
+  const body={systemInstruction:{parts:[{text:system}]},
+    contents:turns.map(t=>({role:t.role==='assistant'?'model':'user',parts:[{text:t.content}]})),generationConfig:gen};
+  let res;
+  try{res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',
+    {method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify(body)})}
+  catch(e){throw{code:'network',message:String(e)}}
+  const j=await res.json().catch(()=>({}));
+  if(!res.ok){const st=res.status,msg=(j.error&&j.error.message)||('HTTP '+st);
+    throw{code:st===429?'rate_limited':(st===400&&/API key/i.test(msg))||st===401||st===403?'bad_key':'api_error',message:msg}}
+  const um=j.usageMetadata||{};const inT=um.promptTokenCount||0,outT=(um.candidatesTokenCount||0)+(um.thoughtsTokenCount||0);
+  const usd=S.settings.freeTier?0:(inT*info.in+outT*info.out)/1e6;
+  recordUsage({model,in:inT,out:outT,think:um.thoughtsTokenCount||0,usd,ms:Math.round(performance.now()-t0),at:new Date().toLocaleString('ja-JP')});
+  const cand=(j.candidates||[])[0];
+  const text=cand&&cand.content&&cand.content.parts?cand.content.parts.map(p=>p.text||'').join(''):'';
+  if(!text)throw{code:'empty',message:(cand&&cand.finishReason)||(j.promptFeedback&&j.promptFeedback.blockReason)||'no text'};
+  return parseLoose(text)}
+function parseLoose(t){try{return JSON.parse(t)}catch(e){}const m=t.match(/\{[\s\S]*\}/);if(m){try{return JSON.parse(m[0])}catch(e){}}throw{code:'invalid_json'}}
+
+/* which engine to use: returns 'claude' | 'gemini' | null */
+async function pickEngine(){const p=S.settings.aiProvider;const hasKey=!!S.settings.gKey.trim();
+  if(p==='gemini')return hasKey?'gemini':null;
+  const sample=await getSample();
+  if(p==='claude')return sample?'claude':null;
+  if(sample)return 'claude';return hasKey?'gemini':null}
+async function askAI(system,turns){const eng=await pickEngine();
+  if(!eng)throw{code:'no_engine'};
+  if(eng==='gemini'){if(budgetHit())throw{code:'budget'};return callGemini(system,turns)}
+  const sample=await getSample();const t=turns.slice();t[0]={role:'user',content:system+'\n\n'+t[0].content};
+  S.usage.claudeCalls++;save();
+  return sample.json(t,{modelTier:'quick',cache:false})}
+let chat=null;
+function showAIMenu(){active=false;
+  if(limitReached()){showRest();return}
+  app.innerHTML=`<button class="back" id="bk">← ちずに もどる</button>
+  <div class="islehead"><div class="big" style="--c:#FFE7A3">👧🏼</div>
+    <div><h2>ミアと はなそう</h2><p class="sub">ミアは カナダに すんでいる 9さいの おんなのこ（AI）だよ。</p></div></div>
+  <p class="note">💡 ほんとうの なまえや じゅうしょ、がっこうの なまえは おしえないでね。</p>
+  <h3 style="margin-top:16px">なにを はなす？</h3>
+  <div class="topics">${TOPICS.map((t,k)=>`<button class="xbtn" data-k="${k}"><span class="xe">${t.e}</span><span><b>${t.ja}</b></span></button>`).join('')}</div>
+  <p class="sub" id="aist" style="margin-top:12px"></p>`;
+  document.getElementById('bk').onclick=showMap;
+  app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>startChat(TOPICS[+b.dataset.k]));
+  pickEngine().then(e=>{const el=document.getElementById('aist');if(!el)return;
+    if(!e)el.textContent='※ AIの じゅんびが できていないよ。おうちの方に「おうちの方」の ページで せっていして もらってね。';
+    else if(e==='gemini'&&budgetHit())el.textContent='※ こんげつの AIの つかえる ぶんが おわったよ。おうちの方に きいてね。'})}
+
+function rules(topic){return `You are "Mia", a friendly 9-year-old girl who lives in Canada. You are chatting with a Japanese child in grade 3 or 4 who is just starting English (around Eiken Grade 5 level).
+Topic of today's chat: ${topic.en}.
+Rules:
+- Use very simple English: 1 or 2 short sentences, 14 words or fewer in total. Use only very common words and present tense (I like..., Do you...?, Can you...?, I have..., What ... do you like?).
+- Usually end with ONE easy question the child can answer in a few words.
+- Be warm, cheerful and encouraging. Talk about yourself a little too (you like dogs, pancakes and soccer).
+- Never ask for the child's real full name, address, school name, phone number, or photos. If the child shares that kind of private information, kindly say it is better to keep it secret.
+- Keep strictly to kid-friendly topics. If the child writes Japanese, nonsense, or something off-topic, reply kindly in simple English and gently return to the topic.
+- If the child's last English message had a mistake, put a corrected natural version of THEIR sentence in "fix"; otherwise "fix" is "". Never tell them they were wrong.
+Reply with ONLY a JSON object like:
+{"en":"Hi! I'm Mia. Do you like dogs?","ja":"やあ！ミアだよ。いぬは すき？","fix":"","hints":["Yes, I do.","No, I don't.","I like cats."]}
+"ja" is a natural Japanese translation written mostly in hiragana and katakana (a 3rd grader must be able to read it).
+"hints" are 3 short English answers (2 to 6 words each) the child could say next, all different.`}
+
+function startChat(topic){if(hasTTS)speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+  chat={topic,msgs:[],count:0,busy:false,ended:false,err:''};active=true;drawChat();askMia()}
+
+function buildTurns(){const t=[{role:'user',content:'Start the chat now: say hello, say your name, and ask one easy question about the topic.'}];
+  for(const m of chat.msgs){if(m.who==='mia')t.push({role:'assistant',content:JSON.stringify({en:m.en,ja:m.ja,fix:m.fix||'',hints:m.hints||[]})});
+    else{let c=m.t;if(chat.count>=AI_MAX)c+='\n\n(This is the last turn. Answer kindly, then say a happy goodbye like "Bye! Talk again soon!". Do not ask a question. "hints" must be ["Bye, Mia!","See you!","Thank you!"].)';t.push({role:'user',content:c})}}
+  return t}
+
+async function askMia(){if(!chat||chat.busy)return;chat.busy=true;chat.err='';drawChat();
+  try{const d=await askAI(rules(chat.topic),buildTurns());
+    if(!d||typeof d.en!=='string')throw{code:'invalid_json'};
+    const m={who:'mia',en:d.en.trim(),ja:String(d.ja||''),fix:String(d.fix||'').trim(),hints:Array.isArray(d.hints)?d.hints.slice(0,3).map(String):[]};
+    chat.msgs.push(m);logAI('ミア',m.en);
+    if(chat.count>=AI_MAX){chat.ended=true;S.usage.chats++;S.coins+=5;S.today.rounds++;S.totalRounds++;
+      if(S.today.rounds>=3&&!S.today.bonus){S.today.bonus=true;S.coins+=10}
+      const t=todayStr();if(S.lastDay!==t){S.streak=(S.lastDay===yesterdayStr()?S.streak:0)+1;S.lastDay=t}
+      save();updateBar()}
+    chat.busy=false;drawChat();say(m.en,0.85*S.settings.speed)}
+  catch(e){chat.busy=false;const c=e&&e.code;
+    chat.err=c==='not_granted'?'AIを つかう きょかが でていないよ。おうちの方に きいてね。':
+      c==='no_engine'||c==='no_key'?'AIの じゅんびが できていないよ。おうちの方に きいてね。':
+      c==='bad_key'?'AIの かぎ（APIキー）が ちがうみたい。おうちの方に きいてね。':
+      c==='budget'?'こんげつの AIの つかえる ぶんが おわったよ。おうちの方に きいてね。':
+      c==='rate_limited'?'すこし まってから もういちど ためしてね。':
+      c==='network'?'インターネットに つながって いるか たしかめてね。':'うまく つながらなかったよ。もういちど ためしてね。';
+    if(e&&e.message)chat.err+='（'+String(e.message).slice(0,80)+'）';
+    drawChat()}}
+
+function sendMe(text){text=String(text||'').trim();if(!text||!chat||chat.busy||chat.ended)return;
+  chat.count++;chat.msgs.push({who:'me',t:text});logAI('こども',text);drawChat();askMia()}
+function logAI(who,t){S.aiLog.push({who,t,d:todayStr()});if(S.aiLog.length>80)S.aiLog=S.aiLog.slice(-80);save()}
+
+function drawChat(){if(!chat)return;const last=[...chat.msgs].reverse().find(m=>m.who==='mia');
+  app.innerHTML=`<button class="back" id="bk">← おわる</button>
+  <h2>${chat.topic.e} ${chat.topic.ja}</h2><p class="sub">ミアと ${AI_MAX}かい はなそう（いま ${chat.count}かい）</p>
+  <div class="chat" id="chat">${chat.msgs.map((m,k)=>m.who==='mia'?`
+    ${m.fix?`<div class="fix">💡 こう いうと いいよ：<span class="en">${esc(m.fix)}</span> <button class="reveal" data-say="${esc(m.fix)}">🔊</button></div>`:''}
+    <div class="bub mia"><span class="en">👧🏼 ${esc(m.en)}</span>
+      <div class="tools"><button data-say="${esc(m.en)}">🔊 きく</button><button data-slow="${esc(m.en)}">🐢</button><button data-ja="${k}">にほんごで みる</button></div>
+      <div class="jat" id="ja${k}" hidden>${esc(m.ja)}</div></div>`
+    :`<div class="bub me"><span class="en">${esc(m.t)}</span></div>`).join('')}
+    ${chat.busy?'<div class="thinking">👧🏼 かんがえちゅう…</div>':''}
+    ${chat.err?`<div class="note">${esc(chat.err)} <button class="btn alt" id="retry" style="margin-top:8px">もういちど</button></div>`:''}
+  </div>
+  ${chat.ended?`<div class="result"><h2>おしゃべり おわり！</h2><p>🪙 5 コイン ゲット！</p>
+    <div class="btnrow"><button class="btn alt" id="again">ほかの はなしを する</button><button class="btn" id="home">ちずに もどる</button></div></div>`:
+  `<div class="composer">
+    ${last&&last.hints.length&&!chat.busy?`<div class="hints">${last.hints.map((h,k)=>`<button class="en" data-h="${k}">${esc(h)}</button>`).join('')}</div>`:''}
+    <div class="crow">${micAvailable()?'<button class="mic" id="cmic" aria-label="はなす">🎤</button>':''}
+      <input id="cin" placeholder="えいごで かいてね" autocomplete="off" autocapitalize="sentences" enterkeyhint="send" ${chat.busy?'disabled':''}>
+      <button class="send" id="csend" ${chat.busy?'disabled':''}>おくる</button></div></div>`}`;
+  document.getElementById('bk').onclick=()=>{chat=null;showAIMenu()};
+  app.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>say(b.dataset.say,0.85*S.settings.speed));
+  app.querySelectorAll('[data-slow]').forEach(b=>b.onclick=()=>saySlow(b.dataset.slow));
+  app.querySelectorAll('[data-ja]').forEach(b=>b.onclick=()=>{document.getElementById('ja'+b.dataset.ja).hidden=false;b.remove()});
+  app.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>sendMe(last.hints[+b.dataset.h]));
+  const r=document.getElementById('retry');if(r)r.onclick=askMia;
+  const ag=document.getElementById('again');if(ag)ag.onclick=()=>{chat=null;showAIMenu()};
+  const hm=document.getElementById('home');if(hm)hm.onclick=()=>{chat=null;showMap()};
+  const inp=document.getElementById('cin'),sb=document.getElementById('csend');
+  if(sb){sb.onclick=()=>sendMe(inp.value);inp.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)sendMe(inp.value)}}
+  const cm=document.getElementById('cmic');
+  if(cm)cm.onclick=()=>{if(chat.busy||cm.classList.contains('listening'))return;cm.classList.add('listening');inp.placeholder='きいてるよ…';
+    inp.placeholder='じゅんび ちゅう…';
+    listen((st,txt)=>{if(st==='ready')inp.placeholder='🔴 いま はなしてね！';else if(st==='interim')inp.value=txt}).then(alts=>{cm.classList.remove('listening');inp.placeholder='えいごで かいてね';
+      if(alts.length){inp.value=alts[0];toast('これで よければ「おくる」');}else toast('きこえなかったよ',true)})
+    .catch(()=>{cm.classList.remove('listening');toast('マイクが つかえないみたい',true);if(micBroken)cm.remove()})};
+  window.scrollTo(0,document.body.scrollHeight)}
+
+/* ============ PARENT ============ */
+function showGate(){active=false;const a=12+(Math.random()*30|0),b=11+(Math.random()*30|0);
+  app.innerHTML=`<div class="gate"><h2>おうちの方へ</h2><p>保護者用の画面です。次の計算の答えを入力してください。</p>
+  <p style="font-size:1.8rem;font-weight:800">${a} + ${b} = ?</p>
+  <input id="ga" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="答え">
+  <div class="btnrow"><button class="btn alt" id="gc">もどる</button><button class="btn" id="go">ひらく</button></div></div>`;
+  document.getElementById('gc').onclick=showMap;
+  const go=()=>{if(+document.getElementById('ga').value===a+b)showParent();else toast('ちがいます',true)};
+  document.getElementById('go').onclick=go;document.getElementById('ga').onkeydown=e=>{if(e.key==='Enter')go()}}
+
+function showParent(){active=false;
+  const learned=ALLWORDS.filter(w=>boxOf('w:'+w.en)>=2).length;
+  const weak=Object.entries(S.items).filter(([k,v])=>v.w>0&&v.box<3).sort((a,b)=>b[1].w-a[1].w).slice(0,15);
+  const label=k=>{const t=k.slice(2);const w=ALLWORDS.find(x=>x.en===t);return w?`${w.e} ${t}（${w.ja}）`:t};
+  const st=S.settings;
+  const opt=(arr,v)=>arr.map(([val,l])=>`<option value="${val}" ${+val===+v?'selected':''}>${l}</option>`).join('');
+  app.innerHTML=`<button class="back" id="bk">← ちずに もどる</button><h2>おうちの方のページ</h2>
+  <div class="panel"><h3>学習のようす</h3><div class="statgrid">
+    <div class="stat"><b>${Math.round(S.today.minutes)}分</b><small>今日の学習時間</small></div>
+    <div class="stat"><b>${S.today.rounds}回</b><small>今日あそんだ回数</small></div>
+    <div class="stat"><b>${Math.round(S.totalMinutes)}分</b><small>これまでの合計</small></div>
+    <div class="stat"><b>${learned} / ${ALLWORDS.length}</b><small>定着した単語（2回以上続けて正解）</small></div>
+    <div class="stat"><b>${totalStars()} / ${ISLANDS.length*15}</b><small>集めた星</small></div>
+    <div class="stat"><b>${S.streak}日</b><small>連続学習</small></div></div></div>
+  <div class="panel"><h3>苦手な単語・文（最近まちがえたもの）</h3>
+    ${weak.length?`<div class="weak">${weak.map(([k,v])=>`<span class="${k.startsWith('w:')?'':''}">${esc(label(k))} ×${v.w}</span>`).join('')}</div>`:'<p class="sub">まだありません。</p>'}</div>
+  <div class="panel"><h3>設定</h3>
+    <div class="setrow"><span>マイク（音声認識）を使う<br><small class="sub">${SR?(micBroken?'この画面ではマイクの許可が得られませんでした':'この端末は対応しています'):'この端末・ブラウザは非対応です'}</small></span><button class="toggle ${st.mic?'on':''}" id="tMic" aria-label="マイク"></button></div>
+    <div class="setrow"><span>AIのともだち（ミア）を表示<br><small class="sub">claude.ai のアカウントの利用枠を使います</small></span><button class="toggle ${st.ai?'on':''}" id="tAi" aria-label="AI"></button></div>
+    <div class="setrow"><span>音声の基本の速さ</span><select id="sSpd">${opt([[1,'ふつう'],[0.85,'すこしゆっくり'],[0.7,'ゆっくり']],st.speed)}</select></div>
+    <div class="setrow"><span>1日の利用時間の上限</span><select id="sLim">${opt([[0,'なし'],[15,'15分'],[20,'20分'],[30,'30分'],[45,'45分'],[60,'60分']],st.limit)}</select></div>
+    <div class="setrow"><span>音声のテスト</span><button class="btn alt" id="tts">🔊 再生</button></div></div>
+  <div class="panel"><h3>AIとの会話の記録（最新）</h3>
+    <div class="log">${S.aiLog.length?S.aiLog.slice(-40).map(l=>`<p><small class="sub">${l.d}</small> <b>${esc(l.who)}：</b><span class="en">${esc(l.t)}</span></p>`).join(''):'<p class="sub">まだ会話はありません。</p>'}</div></div>
+  ${aiPanels()}
+  <div class="panel"><h3>データ</h3><p class="sub">記録はこの端末のブラウザに保存されています。</p>
+    <button class="btn danger" id="reset">すべての記録をリセット</button></div>`;
+  document.getElementById('bk').onclick=showMap;
+  document.getElementById('tMic').onclick=()=>{st.mic=!st.mic;if(st.mic)micBroken=false;save();showParent()};
+  document.getElementById('tAi').onclick=()=>{st.ai=!st.ai;save();showParent()};
+  document.getElementById('sSpd').onchange=e=>{st.speed=+e.target.value;save()};
+  document.getElementById('sLim').onchange=e=>{st.limit=+e.target.value;save()};
+  document.getElementById('tts').onclick=()=>say('Hello! Let\u2019s study English together.');
+  bindAiPanels();
+  document.getElementById('reset').onclick=()=>{if(confirm('星・コイン・シール・学習記録がすべて消えます。よろしいですか？')){S=defaultState();rollDay();save();updateBar();showMap()}}}
+
+/* ============ PARENT: AI + COST ============ */
+function aiPanels(){const st=S.settings,U=S.usage,info=gm();
+  const today=U.days[todayStr()]||{calls:0,in:0,out:0,usd:0};
+  const m=monthStr();const mon=Object.entries(U.days).filter(([d])=>d.startsWith(m)).reduce((a,[,v])=>({calls:a.calls+v.calls,in:a.in+v.in,out:a.out+v.out,usd:a.usd+v.usd}),{calls:0,in:0,out:0,usd:0});
+  // estimate: one chat = 7 calls. history grows each turn; assume avg 650 in / 90 out per call when no data
+  const avgIn=U.calls?U.inTok/U.calls:650,avgOut=U.calls?U.outTok/U.calls:90;
+  const perChat=7*(avgIn*info.in+avgOut*info.out)/1e6;
+  const sel=Object.entries(GEMINI_MODELS).map(([k,v])=>`<option value="${k}" ${k===st.gModel?'selected':''}>${esc(v.label)}（入力$${v.in}/出力$${v.out}）</option>`).join('');
+  const L=U.last;
+  return `<div class="panel"><h3>AIのともだち（ミア）の接続</h3>
+    <div class="setrow"><span>使うAI<br><small class="sub">「自動」は claude.ai 内なら Claude、それ以外（保存したファイルなど）は Gemini を使います</small></span>
+      <select id="aiProv"><option value="auto" ${st.aiProvider==='auto'?'selected':''}>自動</option><option value="gemini" ${st.aiProvider==='gemini'?'selected':''}>Gemini APIのみ</option><option value="claude" ${st.aiProvider==='claude'?'selected':''}>Claude（claude.ai内）のみ</option></select></div>
+    <div class="setrow"><span>Gemini APIキー<br><small class="sub">Google AI Studio で発行。この端末のブラウザ内だけに保存されます</small></span>
+      <span class="crow" style="flex:1;min-width:240px"><input id="gKey" type="password" value="${esc(st.gKey)}" placeholder="AIza..." autocomplete="off" style="font-size:1rem;padding:10px"><button class="btn alt" id="gShow" style="min-height:44px;padding:8px 12px">表示</button></span></div>
+    <div class="setrow"><span>Geminiのモデル</span><select id="gModel" style="max-width:100%">${sel}</select></div>
+    <div class="setrow"><span>接続テスト<br><small class="sub" id="gTestOut">短い文を1回送って確認します（ごく少額かかります）</small></span><button class="btn alt" id="gTest">テストする</button></div>
+    <div class="setrow"><span>今の状態</span><b id="engState">確認中…</b></div></div>
+
+  <div class="panel"><h3>🛠 コストの目安（デバッグ用）</h3>
+    <p class="sub" style="margin-top:0">Gemini の利用量をこの端末で数えた概算です。正確な請求額は Google AI Studio / Google Cloud の請求画面で確認してください。${st.freeTier?'<b>無料枠モードのため金額は0円で記録しています。</b>':''}</p>
+    <div class="statgrid">
+      <div class="stat"><b>${fmtYen(today.usd)}</b><small>今日（${today.calls}回）</small></div>
+      <div class="stat"><b>${fmtYen(mon.usd)}</b><small>今月（${mon.calls}回）</small></div>
+      <div class="stat"><b>${fmtYen(U.usd)}</b><small>合計（${U.calls}回）</small></div>
+      <div class="stat"><b>${fmtYen(perChat)}</b><small>おしゃべり1回（7往復）の目安</small></div>
+      <div class="stat"><b>${Math.round(avgIn)} / ${Math.round(avgOut)}</b><small>1回あたり平均トークン（入力/出力）</small></div>
+      <div class="stat"><b>${U.chats}回</b><small>最後まで話したおしゃべり</small></div></div>
+    <p style="margin:12px 0 4px"><b>月の上限</b>：${+st.budgetJpy?fmtYen(monthUsd())+' / '+st.budgetJpy+'円'+(budgetHit()?' <span style="color:var(--flamingo)">（上限に達したため停止中）</span>':''):'なし'}</p>
+    ${L?`<p class="sub" style="margin:4px 0">最後の呼び出し：${esc(L.at)}／${esc(L.model)}／入力 ${L.in}・出力 ${L.out}${L.think?'（うち思考 '+L.think+'）':''} トークン／${L.ms}ms／${fmtYen(L.usd)}</p>`:''}
+    ${U.claudeCalls?`<p class="sub" style="margin:4px 0">Claude（claude.ai）での呼び出し：${U.claudeCalls}回（claude.aiの利用枠を使うため金額は表示しません）</p>`:''}
+    <div class="setrow"><span>月の上限（円）<br><small class="sub">超えたらミアを止めます。0で上限なし</small></span><input id="bud" inputmode="numeric" value="${+st.budgetJpy||0}" style="width:110px;font-size:1rem;padding:8px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--text)"></div>
+    <div class="setrow"><span>為替レート（1ドル＝円）</span><input id="fx" inputmode="decimal" value="${+st.usdJpy||150}" style="width:110px;font-size:1rem;padding:8px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--text)"></div>
+    <div class="setrow"><span>無料枠で使っている<br><small class="sub">オンにすると金額を0円で記録（トークン数は記録）</small></span><button class="toggle ${st.freeTier?'on':''}" id="tFree" aria-label="無料枠"></button></div>
+    <div class="setrow"><span>単価（1Mトークンあたり、2026年10月時点）</span><small class="sub">${esc(info.label)}：入力 $${info.in}／出力 $${info.out}</small></div>
+    <div class="setrow"><span>コスト記録</span><button class="btn alt" id="uReset">リセット</button></div></div>`}
+
+function bindAiPanels(){const st=S.settings;
+  const refresh=()=>{pickEngine().then(e=>{const el=document.getElementById('engState');if(el)el.textContent=e==='claude'?'Claude（claude.ai）で動作':e==='gemini'?'Gemini（'+st.gModel+'）で動作'+(budgetHit()?'／上限で停止中':''):'AIは使えません（キー未設定など）'})};
+  refresh();
+  document.getElementById('aiProv').onchange=e=>{st.aiProvider=e.target.value;save();refresh()};
+  const k=document.getElementById('gKey');k.onchange=()=>{st.gKey=k.value.trim();save();refresh()};
+  document.getElementById('gShow').onclick=()=>{k.type=k.type==='password'?'text':'password'};
+  document.getElementById('gModel').onchange=e=>{st.gModel=e.target.value;save();showParent()};
+  document.getElementById('bud').onchange=e=>{st.budgetJpy=Math.max(0,+e.target.value||0);save();showParent()};
+  document.getElementById('fx').onchange=e=>{st.usdJpy=+e.target.value||150;save();showParent()};
+  document.getElementById('tFree').onclick=()=>{st.freeTier=!st.freeTier;save();showParent()};
+  document.getElementById('uReset').onclick=()=>{if(confirm('コストの記録を0に戻します。よろしいですか？')){S.usage={calls:0,inTok:0,outTok:0,usd:0,chats:0,claudeCalls:0,days:{},last:null};save();showParent()}};
+  document.getElementById('gTest').onclick=async()=>{st.gKey=k.value.trim();save();const out=document.getElementById('gTestOut');out.textContent='送信中…';
+    try{const d=await callGemini('Reply with only a JSON object {"en":"..."} containing a one-sentence greeting for a child.',[{role:'user',content:'Say hello.'}],60);
+      const L=S.usage.last;out.textContent='✅ 成功：「'+(d.en||'')+'」 入力'+L.in+'／出力'+L.out+'トークン、'+L.ms+'ms、'+fmtYen(L.usd);refresh()}
+    catch(e){out.textContent='❌ 失敗：'+(e.code==='no_key'?'キーが空です':e.code==='bad_key'?'キーが正しくないか、権限がありません':e.code==='network'?'通信できません（ネット接続、または表示している環境が外部通信を禁止しています）':e.code==='rate_limited'?'回数制限に達しました。少し待ってください':'')+(e.message?'（'+e.message.slice(0,120)+'）':'')}};
+}
+
+/* ============ BOOT ============ */
+document.getElementById('homeBtn').onclick=()=>{chat=null;showMap()};
+document.getElementById('parentBtn').onclick=()=>{chat=null;showGate()};
+showMap();
+</script>
+</body>
+</html>
